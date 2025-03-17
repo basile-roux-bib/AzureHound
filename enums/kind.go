@@ -26,6 +26,7 @@ const (
 	KindAZDevice                          Kind = "AZDevice"
 	KindAZDeviceOwner                     Kind = "AZDeviceOwner"
 	KindAZGroup                           Kind = "AZGroup"
+	KindAZGroup365                        Kind = "AZGroup365"
 	KindAZGroupMember                     Kind = "AZGroupMember"
 	KindAZGroupOwner                      Kind = "AZGroupOwner"
 	KindAZKeyVault                        Kind = "AZKeyVault"
