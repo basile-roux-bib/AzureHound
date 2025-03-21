@@ -33,32 +33,32 @@ import (
 )
 
 func init() {
-	listRootCmd.AddCommand(listGroups65Cmd)
+	listRootCmd.AddCommand(listGroups365Cmd)
 }
 
-var listGroups65Cmd = &cobra.Command{
-	Use:          "groups65",
-	Long:         "Lists Azure Active Directory Microsoft 65 Groups",
-	Run:          listGroups65CmdImpl,
+var listGroups365Cmd = &cobra.Command{
+	Use:          "groups365",
+	Long:         "Lists Azure Active Directory Microsoft 365 Groups",
+	Run:          listGroups365CmdImpl,
 	SilenceUsage: true,
 }
 
-func listGroups65CmdImpl(cmd *cobra.Command, _ []string) {
+func listGroups365CmdImpl(cmd *cobra.Command, _ []string) {
 	ctx, stop := signal.NotifyContext(cmd.Context(), os.Interrupt, os.Kill)
 	defer gracefulShutdown(stop)
 
 	log.V(1).Info("testing connections")
 	azClient := connectAndCreateClient()
-	log.Info("collecting azure active directory microsoft 65 groups...")
+	log.Info("collecting azure active directory microsoft 365 groups...")
 	start := time.Now()
-	stream := listGroups65(ctx, azClient)
+	stream := listGroups365(ctx, azClient)
 	panicrecovery.HandleBubbledPanic(ctx, stop, log)
 	outputStream(ctx, stream)
 	duration := time.Since(start)
 	log.Info("collection completed", "duration", duration.String())
 }
 
-func listGroups65(ctx context.Context, client client.AzureClient) <-chan interface{} {
+func listGroups365(ctx context.Context, client client.AzureClient) <-chan interface{} {
 	out := make(chan interface{})
 
 	go func() {
