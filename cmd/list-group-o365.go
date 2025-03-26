@@ -65,15 +65,15 @@ func listGroups365(ctx context.Context, client client.AzureClient) <-chan interf
 		defer panicrecovery.PanicRecovery()
 		defer close(out)
 		count := 0
-		for item := range client.ListAzureADGroups(ctx, query.GraphParams{Filter: "groupTypes/any(g:g eq 'Unified')"}) {
+		for item := range client.ListAzureADGroups365(ctx, query.GraphParams{Filter: "groupTypes/any(g:g eq 'Unified')"}) {
 			if item.Error != nil {
-				log.Error(item.Error, "unable to continue processing groups")
+				log.Error(item.Error, "unable to continue processing Microsoft 365 groups")
 				return
 			} else {
-				log.V(2).Info("found group", "group", item)
+				log.V(2).Info("found Microsoft 365 group", "group", item)
 				count++
-				group := models.Group{
-					Group:      item.Ok,
+				group := models.Group365{
+					Group365:   item.Ok,
 					TenantId:   client.TenantInfo().TenantId,
 					TenantName: client.TenantInfo().DisplayName,
 				}
@@ -85,7 +85,7 @@ func listGroups365(ctx context.Context, client client.AzureClient) <-chan interf
 				}
 			}
 		}
-		log.Info("finished listing all groups", "count", count)
+		log.Info("finished listing all Microsoft 365 groups", "count", count)
 	}()
 
 	return out
