@@ -98,7 +98,7 @@ func listGroup365Owners(ctx context.Context, client client.AzureClient, groups <
 					}
 					count = 0
 				)
-				for item := range client.ListAzureADGroupOwners(ctx, id, params) {
+				for item := range client.ListAzureADGroup365Owners(ctx, id, params) {
 					if item.Error != nil {
 						log.Error(item.Error, "unable to continue processing owners for this Microsoft 365 group", "groupId", id)
 					} else {
