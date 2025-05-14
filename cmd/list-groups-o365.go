@@ -33,75 +33,59 @@ import (
 )
 
 func init() {
-	listRootCmd.AddCommand(listUsersCmd)
+	listRootCmd.AddCommand(listGroups365Cmd)
 }
 
-var listUsersCmd = &cobra.Command{
-	Use:          "users",
-	Long:         "Lists Azure Active Directory Users",
-	Run:          listUsersCmdImpl,
+var listGroups365Cmd = &cobra.Command{
+	Use:          "groups365",
+	Long:         "Lists Azure Active Directory Microsoft 365 Groups",
+	Run:          listGroups365CmdImpl,
 	SilenceUsage: true,
 }
 
-func listUsersCmdImpl(cmd *cobra.Command, _ []string) {
+func listGroups365CmdImpl(cmd *cobra.Command, _ []string) {
 	ctx, stop := signal.NotifyContext(cmd.Context(), os.Interrupt, os.Kill)
 	defer gracefulShutdown(stop)
 
 	log.V(1).Info("testing connections")
 	azClient := connectAndCreateClient()
-	log.Info("collecting azure active directory users...")
+	log.Info("collecting azure active directory microsoft 365 groups...")
 	start := time.Now()
-	stream := listUsers(ctx, azClient)
+	stream := listGroups365(ctx, azClient)
 	panicrecovery.HandleBubbledPanic(ctx, stop, log)
 	outputStream(ctx, stream)
 	duration := time.Since(start)
 	log.Info("collection completed", "duration", duration.String())
 }
 
-func listUsers(ctx context.Context, client client.AzureClient) <-chan interface{} {
+func listGroups365(ctx context.Context, client client.AzureClient) <-chan interface{} {
 	out := make(chan interface{})
-
-	params := query.GraphParams{Select: []string{
-		"accountEnabled",
-		"createdDateTime",
-		"displayName",
-		"jobTitle",
-		"lastPasswordChangeDateTime",
-		"mail",
-		"onPremisesSecurityIdentifier",
-		"onPremisesSyncEnabled",
-		"userPrincipalName",
-		"userType",
-		"id",
-		"businessPhones",
-		"mobilePhone",
-	}}
 
 	go func() {
 		defer panicrecovery.PanicRecovery()
 		defer close(out)
 		count := 0
-		for item := range client.ListAzureADUsers(ctx, params) {
+		for item := range client.ListAzureADGroups365(ctx, query.GraphParams{Filter: "groupTypes/any(g:g eq 'Unified')"}) {
 			if item.Error != nil {
-				log.Error(item.Error, "unable to continue processing users")
+				log.Error(item.Error, "unable to continue processing Microsoft 365 groups")
 				return
 			} else {
-				log.V(2).Info("found user", "user", item)
+				log.V(2).Info("found Microsoft 365 group", "group", item)
 				count++
-				user := models.User{
-					User:       item.Ok,
+				group := models.Group365{
+					Group365:   item.Ok,
 					TenantId:   client.TenantInfo().TenantId,
 					TenantName: client.TenantInfo().DisplayName,
 				}
 				if ok := pipeline.SendAny(ctx.Done(), out, AzureWrapper{
-					Kind: enums.KindAZUser,
-					Data: user,
+					Kind: enums.KindAZGroup365,
+					Data: group,
 				}); !ok {
 					return
 				}
 			}
 		}
-		log.Info("finished listing all users", "count", count)
+		log.Info("finished listing all Microsoft 365 groups", "count", count)
 	}()
 
 	return out

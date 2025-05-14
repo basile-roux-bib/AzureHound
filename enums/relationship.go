@@ -29,6 +29,7 @@ const (
 	RelationshipAZGetSecrets       Relationship = "AZGetSecrets"
 	RelationshipAZHasRole          Relationship = "AZHasRole"
 	RelationshipAZMemberOf         Relationship = "AZMemberOf"
+	RelationshipAZM365MemberOf     Relationship = "AZM365MemberOf"
 	RelationshipAZOwner            Relationship = "AZOwner"
 	RelationshipAZRunsAs           Relationship = "AZRunsAs"
 	RelationshipAZVMContributor    Relationship = "AZVMContributor"
